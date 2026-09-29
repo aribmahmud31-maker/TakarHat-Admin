@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#061f17">
+<title>Taka Hat Admin</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+<style>
+    *{box-sizing:border-box}html,body{margin:0;padding:0;background:#061f17;color:#fff;font-family:Arial,"Noto Sans Bengali",sans-serif}
+    body{min-height:100vh;background:radial-gradient(circle at 15% 0,#176c50 0,#082e23 38%,#031a13 100%)}
+    button,input,select{font:inherit}button{cursor:pointer;border:0}
+    .wrap{max-width:760px;margin:auto;padding:18px 15px 60px}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.brand{display:flex;gap:11px;align-items:center}.logo{width:50px;height:50px;border-radius:17px;background:linear-gradient(145deg,#ffe47a,#c99518);display:grid;place-items:center;font-size:26px;box-shadow:0 8px 22px #0007}.name{font-size:22px;font-weight:950}.sub{font-size:11px;opacity:.65;margin-top:3px}
+    .hero{background:linear-gradient(135deg,#0e9b6c,#07543d);border:1px solid #ffffff18;border-radius:25px;padding:20px;box-shadow:0 16px 38px #0007}.ey{font-size:12px;opacity:.7}.big{font-size:34px;font-weight:950;margin-top:5px}.big b{color:#ffe066}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-top:15px}.panel{background:#ffffff0d;border:1px solid #ffffff14;border-radius:21px;padding:16px}.title{font-size:18px;font-weight:900;margin:22px 2px 10px}
+    label{display:block;font-size:11px;opacity:.7;margin:10px 0 6px}input,select{width:100%;padding:13px;border-radius:13px;border:1px solid #ffffff1a;background:#0004;color:#fff;outline:0}select option{color:#111}
+    .save{width:100%;padding:14px;border-radius:14px;background:linear-gradient(145deg,#ffd95b,#d79a0b);color:#2b2100;font-weight:950;margin-top:13px}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #ffffff12}.row:last-child{border:0}.muted{font-size:11px;opacity:.62}
+    .table{width:100%;border-collapse:collapse;font-size:12px}.table th,.table td{text-align:left;padding:10px;border-bottom:1px solid #ffffff12}.pill{padding:4px 7px;border-radius:7px;background:#e9ad2630;color:#ffd75a;font-size:9px}
+    .danger{background:#d74a4a!important;color:#fff!important}.ok{background:#19a975!important;color:#fff!important}
+    .spinRewardRow{display:grid;grid-template-columns:1fr 1fr 42px;gap:8px;align-items:end;padding:10px 0;border-bottom:1px solid #ffffff12}
+.spinRewardRow input{margin:0}
+.removeReward{height:43px;border-radius:12px;background:#d74a4a;color:#fff;font-weight:900}
+.chanceTotal{margin-top:10px;padding:10px;border-radius:12px;background:#0003;font-size:12px}
+.toast{position:fixed;z-index:100;left:50%;bottom:25px;transform:translate(-50%,20px);opacity:0;background:#111e;padding:11px 15px;border-radius:12px;font-size:12px;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .pinOverlay{position:fixed;inset:0;z-index:200;background:#031a13eF;backdrop-filter:blur(12px);display:grid;place-items:center;padding:20px}
+    .pinOverlay.locked{display:none}
+    .pinBox{width:min(420px,100%);background:linear-gradient(145deg,#0e9b6c,#07543d);border:1px solid #ffffff18;border-radius:24px;padding:24px;box-shadow:0 18px 50px #0009;text-align:center}
+    .pinLogo{font-size:42px}.pinTitle{font-size:22px;font-weight:950;margin-top:8px}.pinSub{font-size:12px;opacity:.7;margin:6px 0 14px}
+    .pinInput{margin-top:4px}.pinError{min-height:18px;color:#ff9c9c;font-size:11px;margin:8px 0}.pinBtn{width:100%;padding:14px;border-radius:14px;background:linear-gradient(145deg,#ffd95b,#d79a0b);color:#2b2100;font-weight:950;margin-top:6px}
+    @media(max-width:620px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div id="pinOverlay" class="pinOverlay">
+  <div class="pinBox">
+    <div class="pinLogo">🔐</div>
+    <div class="pinTitle">Admin Access</div>
+    <div class="pinSub">Admin dashboard খুলতে PIN দিন</div>
+    <input id="adminPinInput" class="pinInput" type="password" inputmode="text" autocomplete="off" placeholder="Enter PIN">
+    <div id="pinError" class="pinError"></div>
+    <button class="pinBtn" onclick="unlockAdmin()">🔓 Unlock Admin</button>
+  </div>
+</div>
+
+        <div class="wrap">
+          <div class="top"><div class="brand"><div class="logo">🪙</div><div><div class="name">টাকার হাট Admin</div><div class="sub">Control Center • Settings</div></div></div><div>⚙️</div></div>
+          <div class="hero"><div class="ey">ADMIN DASHBOARD</div><div class="big">৳ <b id="total">0.00</b></div><div class="muted">Local demo data / browser storage</div></div>
+          <div class="title">⚙️ Reward &amp; Limits</div>
+          <div class="grid">
+            <div class="panel"><b>Watch &amp; Earn</b><label>Ad reward (BDT)</label><input id="adReward" type="number" step="0.01"/><label>Daily ad limit</label><input id="adLimit" type="number"/></div>
+            <div class="panel"><b>Lucky Spin</b><label>Daily spin limit</label><input id="spinLimit" type="number"/><label>Minimum withdrawal (BDT)</label><input id="min" type="number" value="50"/></div>
+          </div>
+          <div class="title">🎡 Spin Rewards & Chance</div>
+<div class="panel">
+  <div class="muted" style="margin-bottom:10px">
+    প্রতিটি Spin Amount এবং কোন reward কত % chance-এ আসবে তা এখান থেকে পরিবর্তন করুন। মোট Chance 100% রাখা ভালো।
+  </div>
+  <div id="spinRewards"></div>
+  <button class="save" style="background:linear-gradient(145deg,#168bd1,#09649b);color:#fff" onclick="addSpinReward()">＋ Add Reward</button>
+</div>
+
+<div class="title">💳 Payment Methods</div>
+          <div class="panel">
+            <div class="row"><span>bKash</span><input id="bkash" type="checkbox" checked="checked" style="width:auto"/></div>
+            <div class="row"><span>Nagad</span><input id="nagad" type="checkbox" checked="checked" style="width:auto"/></div>
+            <div class="row"><span>Rocket</span><input id="rocket" type="checkbox" checked="checked" style="width:auto"/></div>
+          </div>
+          <div class="title">📢 Community</div>
+          <div class="panel"><label>Channel URL</label><input id="channel"/><label>AdsGram Block ID</label><input id="block"/><button class="save" onclick="saveSettings()">💾 Save Settings</button></div>
+          <div class="title">🔐 Admin PIN</div>
+<div class="panel">
+  <div class="muted">বর্তমান PIN দিয়ে Admin unlock করার পর নতুন PIN সেট করতে পারবেন।</div>
+  <label>New PIN</label><input id="newPin" type="password" autocomplete="new-password" placeholder="New admin PIN">
+  <label>Confirm PIN</label><input id="confirmPin" type="password" autocomplete="new-password" placeholder="Confirm new PIN">
+  <button class="save" style="background:linear-gradient(145deg,#168bd1,#09649b);color:#fff" onclick="changePin()">🔐 Change PIN</button>
+</div>
+<div class="title">📜 Withdrawal Requests</div>
+          <div class="panel"><table class="table"><thead><tr><th>Method / Account</th><th>Amount (BDT)</th><th>Status</th><th>Action</th></tr></thead><tbody id="requests"></tbody></table></div>
+        </div>
+        <div id="toast" class="toast"></div>
+        <script>
+                const PIN_KEY="TakaHatAdminPIN";
+function getAdminPin(){return localStorage.getItem(PIN_KEY)||"Taka@890";}
+function unlockAdmin(){
+  const entered=document.getElementById("adminPinInput").value;
+  const err=document.getElementById("pinError");
+  if(entered===getAdminPin()){
+    document.getElementById("pinOverlay").classList.add("locked");
+    sessionStorage.setItem("TakaHatAdminUnlocked","1");
+    err.textContent="";
+  }else{
+    err.textContent="PIN ভুল হয়েছে। আবার চেষ্টা করুন।";
+    document.getElementById("adminPinInput").value="";
+  }
+}
+function changePin(){
+  const n=document.getElementById("newPin").value;
+  const c=document.getElementById("confirmPin").value;
+  if(!n||n.length<4)return toast("কমপক্ষে 4 character PIN দিন");
+  if(n!==c)return toast("দুইটি PIN একই নয়");
+  localStorage.setItem(PIN_KEY,n);
+  document.getElementById("newPin").value="";
+  document.getElementById("confirmPin").value="";
+  toast("Admin PIN changed");
+}
+function checkAdminSession(){
+  if(sessionStorage.getItem("TakaHatAdminUnlocked")==="1")
+    document.getElementById("pinOverlay").classList.add("locked");
+}
+
+const K="TakaHatAdminSettings";let S=JSON.parse(localStorage.getItem(K)||'{"adReward":0.02,"adLimit":50,"spinLimit":1,"min":{"bkash":50,"nagad":50,"rocket":50},"spinRewards":[{"amount":0.10,"chance":25},{"amount":0.20,"chance":25},{"amount":0.50,"chance":20},{"amount":1.00,"chance":15},{"amount":2.00,"chance":10},{"amount":5.00,"chance":5}],"channel":"https://t.me/TakarHat_Bot","block":"YOUR_ADSGRAM_BLOCK_ID","payment":{"bkash":true,"nagad":true,"rocket":true}}');
+        function toast(x){let t=document.getElementById("toast");t.textContent=x;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+        function ensureSpinRewards(){
+if(!Array.isArray(S.spinRewards)||!S.spinRewards.length){
+S.spinRewards=[
+{amount:0.10,chance:25},{amount:0.20,chance:25},{amount:0.50,chance:20},
+{amount:1.00,chance:15},{amount:2.00,chance:10},{amount:5.00,chance:5}
+];
+}
+}
+function renderSpinRewards(){
+ensureSpinRewards();
+const box=document.getElementById("spinRewards");
+box.innerHTML=S.spinRewards.map((r,i)=>'<div class="spinRewardRow"><div><label>Amount (BDT)</label><input type="number" min="0" step="0.01" value="'+Number(r.amount).toFixed(2)+'" oninput="S.spinRewards['+i+'].amount=Number(this.value)||0"></div><div><label>Chance (%)</label><input type="number" min="0" max="100" step="1" value="'+Number(r.chance)+'" oninput="S.spinRewards['+i+'].chance=Number(this.value)||0;updateChanceTotal()"></div><button class="removeReward" onclick="removeSpinReward('+i+')">×</button></div>').join("")+'<div class="chanceTotal">Total Chance: <b id="chanceTotal">0%</b></div>';
+updateChanceTotal();
+}
+function updateChanceTotal(){
+const el=document.getElementById("chanceTotal");
+if(el)el.textContent=S.spinRewards.reduce((n,r)=>n+Number(r.chance||0),0).toFixed(0)+"%";
+}
+function addSpinReward(){ensureSpinRewards();S.spinRewards.push({amount:0.10,chance:0});renderSpinRewards();}
+function removeSpinReward(i){ensureSpinRewards();if(S.spinRewards.length<=1)return toast("কমপক্ষে ১টি reward রাখুন");S.spinRewards.splice(i,1);renderSpinRewards();}
+function load(){
+ensureSpinRewards();
+document.getElementById("adReward").value=S.adReward;
+document.getElementById("adLimit").value=S.adLimit;
+document.getElementById("spinLimit").value=S.spinLimit;
+document.getElementById("channel").value=S.channel;
+document.getElementById("block").value=S.block;
+document.getElementById("bkash").checked=S.payment.bkash!==false;
+document.getElementById("nagad").checked=S.payment.nagad!==false;
+document.getElementById("rocket").checked=S.payment.rocket!==false;
+let d=JSON.parse(localStorage.getItem("TakaHatUser")||'{"balance":0,"history":[]}');
+document.getElementById("total").textContent=Number(d.balance||0).toFixed(2);
+document.getElementById("requests").innerHTML=(d.history||[]).map((x,i)=>'<tr><td><b>'+x.method+'</b><br><small>'+x.number+'</small></td><td><b>৳'+Number(x.amount).toFixed(2)+'</b></td><td><span class="pill">'+x.status+'</span></td><td><button class="save ok" onclick="setStatus('+i+',\'COMPLETED\')">Complete</button> <button class="save danger" onclick="setStatus('+i+',\'REJECTED\')">Reject</button></td></tr>').join("")||'<tr><td colspan="4" class="muted">No requests</td></tr>'
+}
+function saveSettings(){
+S={
+adReward:Number(document.getElementById("adReward").value)||0,
+adLimit:Number(document.getElementById("adLimit").value)||0,
+spinLimit:Number(document.getElementById("spinLimit").value)||0,
+spinRewards:S.spinRewards,
+min:Number(document.getElementById("min").value)||0,
+channel:document.getElementById("channel").value,
+block:document.getElementById("block").value,
+payment:{
+bkash:document.getElementById("bkash").checked,
+nagad:document.getElementById("nagad").checked,
+rocket:document.getElementById("rocket").checked
+}
+};
+localStorage.setItem(K,JSON.stringify(S));
+localStorage.setItem("takaHatSettings",JSON.stringify({
+adReward:S.adReward,
+adLimit:S.adLimit,
+spinLimit:S.spinLimit,
+spinRewards:S.spinRewards,
+min:Number(S.min)||0,
+channel:S.channel,
+block:S.block,
+payment:S.payment
+}));
+toast("Settings saved")
+}
+function setStatus(i,status){let d=JSON.parse(localStorage.getItem("TakaHatUser")||'{"balance":0,"history":[]}');if(d.history[i])d.history[i].status=status;localStorage.setItem("TakaHatUser",JSON.stringify(d));load();toast(status)}
+        load();
+                </script>
+      
+</body>
+</html>
